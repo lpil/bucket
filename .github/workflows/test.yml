@@ -9,6 +9,24 @@ on:
 
 jobs:
   test:
+    services:
+      minio:
+        image: minio/minio
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: miniopass
+        options: >-
+          --health-cmd="curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 9000:9000
+          - 9001:9001
+        command: 
+          - server
+          - /data
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
