@@ -11,7 +11,7 @@ jobs:
   test:
     services:
       minio:
-        image: minio/minio
+        image: lazybit/minio
         env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: miniopass
