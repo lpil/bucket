@@ -1,4 +1,4 @@
-import bucket.{type Bucket, type Credentials, type S3Error}
+import bucket.{type Credentials, type S3Error}
 import bucket/internal
 import gleam/bit_array
 import gleam/http
