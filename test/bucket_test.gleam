@@ -47,9 +47,9 @@ pub fn create_bucket_test() {
     |> create_bucket.build(helpers.creds)
   req.body
   |> should.equal(<<
-    "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">",
-    "<LocationConstraint>us-east-1</LocationConstraint>",
-    "</CreateBucketConfiguration>",
+    "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
+    "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
+    "</CreateBucketConfiguration>":utf8,
   >>)
   let assert Ok(res) = httpc.send_bits(req)
   let assert Ok(Nil) = create_bucket.response(res)
