@@ -23,9 +23,6 @@ jobs:
         ports:
           - 9000:9000
           - 9001:9001
-        command: 
-          - server
-          - /data
 
     runs-on: ubuntu-latest
     steps:
