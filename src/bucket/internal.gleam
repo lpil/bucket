@@ -5,15 +5,11 @@ import bucket.{
 }
 import bucket/internal/xml
 import gleam/dict.{type Dict}
-import gleam/function
 import gleam/http
 import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
-import gleam/io
-import gleam/list
 import gleam/option
-import gleam/result
-import xmlm.{Data, ElementEnd, ElementStart}
+import xmlm
 
 pub fn error_xml_syntax(e: xmlm.InputError) -> Result(a, BucketError) {
   Error(InvalidXmlSyntaxError(xmlm.input_error_to_string(e)))
@@ -84,33 +80,20 @@ fn s3_error_to_bucket_error(t) {
 }
 
 pub fn forbidden_error(response: Response(BitArray)) -> Result(a, BucketError) {
-  use input <- result.try(xml.start_parsing(response))
-
   let parsed =
     xml.element("Error", S3Error(response.status, "", "", "", ""))
-    |> xml.child(
-      "Code",
-      fn(error, code) { S3Error(..error, code:) },
-      xml.text_element,
-    )
-    |> xml.child(
-      "Message",
-      fn(error, message) { S3Error(..error, message:) },
-      xml.text_element,
-    )
-    |> xml.child(
-      "Resource",
-      fn(error, resource) { S3Error(..error, resource:) },
-      xml.text_element,
-    )
-    |> xml.child(
-      "RequestId",
-      fn(error, request_id) { S3Error(..error, request_id:) },
-      xml.text_element,
-    )
-    |> xml.child("HostId", fn(error, _) { error }, xml.text_element)
-    |> xml.map_finish(s3_error_to_bucket_error)
-    |> xml.parse(input)
+    |> xml.keep_text("Code", fn(error, code) { S3Error(..error, code:) })
+    |> xml.keep_text("Message", fn(error, message) {
+      S3Error(..error, message:)
+    })
+    |> xml.keep_text("Resource", fn(error, resource) {
+      S3Error(..error, resource:)
+    })
+    |> xml.keep_text("RequestId", fn(error, request_id) {
+      S3Error(..error, request_id:)
+    })
+    |> xml.map(s3_error_to_bucket_error)
+    |> xml.parse(response.body)
 
   case parsed {
     Ok(e) -> Error(e)
