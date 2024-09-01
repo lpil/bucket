@@ -1,4 +1,4 @@
-import bucket.{type Credentials, type S3Error}
+import bucket.{type Credentials, type BucketError}
 import bucket/internal
 import gleam/http
 import gleam/http/request.{type Request, Request}
@@ -32,7 +32,7 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
   internal.request(creds, http.Delete, "/" <> builder.name, <<>>)
 }
 
-pub fn response(response: Response(BitArray)) -> Result(Nil, S3Error) {
+pub fn response(response: Response(BitArray)) -> Result(Nil, BucketError) {
   case response.status {
     204 -> Ok(Nil)
     x -> todo as { "unexpected error " <> int.to_string(x) }

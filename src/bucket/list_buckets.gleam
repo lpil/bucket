@@ -1,5 +1,6 @@
-import bucket.{type Bucket, type Credentials, type S3Error, Bucket}
+import bucket.{type Bucket, type BucketError, type Credentials, Bucket}
 import bucket/internal
+import bucket/internal/xml
 import gleam/http
 import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
@@ -16,8 +17,18 @@ pub type ListAllMyBucketsResult {
 
 pub fn response(
   response: Response(BitArray),
-) -> Result(ListAllMyBucketsResult, S3Error) {
-  use input <- result.try(start_parsing(response))
+) -> Result(ListAllMyBucketsResult, BucketError) {
+  case response.status {
+    200 -> response_success(response)
+    403 -> internal.forbidden_error(response)
+    got -> Error(bucket.UnexpectedHttpStatusError(expected: 200, got:))
+  }
+}
+
+fn response_success(
+  response: Response(BitArray),
+) -> Result(ListAllMyBucketsResult, BucketError) {
+  use input <- result.try(xml.start_parsing(response))
   case xmlm.signal(input) {
     Ok(#(ElementStart(Tag(Name(_, "ListAllMyBucketsResult"), _)), input)) ->
       parse_list_all_my_buckets_result(
@@ -36,7 +47,7 @@ pub fn request(creds: Credentials) -> Request(BitArray) {
 fn parse_list_all_my_buckets_result(
   input: xmlm.Input,
   data: ListAllMyBucketsResult,
-) -> Result(ListAllMyBucketsResult, S3Error) {
+) -> Result(ListAllMyBucketsResult, BucketError) {
   case xmlm.signal(input) {
     Ok(#(ElementEnd, _)) -> Ok(data)
     Ok(#(ElementStart(Tag(Name(_, "Buckets"), _)), input)) ->
@@ -60,7 +71,7 @@ fn parse_list_all_my_buckets_result(
 fn parse_buckets(
   input: xmlm.Input,
   data: List(Bucket),
-) -> Result(#(List(Bucket), xmlm.Input), S3Error) {
+) -> Result(#(List(Bucket), xmlm.Input), BucketError) {
   case xmlm.signal(input) {
     Ok(#(ElementEnd, input)) -> Ok(#(data, input))
     Ok(#(ElementStart(Tag(Name(_, "Bucket"), _)), input)) ->
@@ -76,7 +87,7 @@ fn parse_buckets(
 fn parse_bucket(
   input: xmlm.Input,
   data: Bucket,
-) -> Result(#(Bucket, xmlm.Input), S3Error) {
+) -> Result(#(Bucket, xmlm.Input), BucketError) {
   case xmlm.signal(input) {
     Ok(#(ElementEnd, input)) -> Ok(#(data, input))
     Ok(#(ElementStart(Tag(Name(_, "Name"), _)), input)) ->
@@ -98,7 +109,7 @@ fn parse_bucket(
 fn simple_element(
   input: xmlm.Input,
   data: String,
-) -> Result(#(String, xmlm.Input), S3Error) {
+) -> Result(#(String, xmlm.Input), BucketError) {
   case xmlm.signal(input) {
     Ok(#(ElementEnd, input)) -> Ok(#(data, input))
     Ok(#(Data(data), input)) -> simple_element(input, data)
@@ -107,7 +118,7 @@ fn simple_element(
   }
 }
 
-fn skip_element(input: xmlm.Input) -> Result(xmlm.Input, S3Error) {
+fn skip_element(input: xmlm.Input) -> Result(xmlm.Input, BucketError) {
   case xmlm.signal(input) {
     Ok(#(ElementEnd, input)) -> Ok(input)
     Ok(#(ElementStart(_), input)) ->
@@ -117,14 +128,5 @@ fn skip_element(input: xmlm.Input) -> Result(xmlm.Input, S3Error) {
       }
     Ok(#(_, input)) -> skip_element(input)
     Error(e) -> internal.error_xml_syntax(e)
-  }
-}
-
-fn start_parsing(response: Response(BitArray)) -> Result(xmlm.Input, S3Error) {
-  let input = xmlm.from_bit_array(response.body)
-  case xmlm.signal(input) {
-    Error(e) -> internal.error_xml_syntax(e)
-    Ok(#(xmlm.Dtd(_), input)) -> Ok(input)
-    Ok(#(_, _)) -> Ok(input)
   }
 }

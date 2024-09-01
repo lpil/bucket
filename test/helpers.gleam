@@ -16,6 +16,15 @@ pub const creds = bucket.Credentials(
   secret_access_key: "miniopass",
 )
 
+pub const bad_creds = bucket.Credentials(
+  scheme: http.Http,
+  port: option.Some(9000),
+  host: "localhost",
+  region: "us-east-1",
+  access_key_id: "unknown",
+  secret_access_key: "nope",
+)
+
 pub fn create_bucket(name: String) -> Nil {
   let req = create_bucket.request(name:) |> create_bucket.build(creds)
   let assert Ok(res) = httpc.send_bits(req)

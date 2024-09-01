@@ -1,9 +1,17 @@
 import gleam/http.{type Scheme}
 import gleam/option.{type Option}
 
-pub type S3Error {
-  XmlSyntaxError(String)
+pub type BucketError {
+  InvalidXmlSyntaxError(String)
   UnexpectedXmlFormatError(String)
+  UnexpectedHttpStatusError(expected: Int, got: Int)
+  S3Error(
+    http_status: Int,
+    code: String,
+    message: String,
+    resource: String,
+    request_id: String,
+  )
 }
 
 pub type Credentials {

@@ -1,3 +1,4 @@
+import bucket
 import bucket/create_bucket
 import bucket/delete_bucket
 import bucket/list_buckets.{ListAllMyBucketsResult}
@@ -12,7 +13,36 @@ pub fn main() {
   gleeunit.main()
 }
 
-// TODO: invalid creds
+pub fn list_buckets_bad_creds_test() {
+  let assert Ok(res) =
+    list_buckets.request(helpers.bad_creds) |> httpc.send_bits
+  let assert Error(res) = list_buckets.response(res)
+  let assert bucket.S3Error(
+    http_status:,
+    code:,
+    message:,
+    request_id:,
+    resource:,
+  ) = res
+
+  http_status
+  |> should.equal(403)
+
+  code
+  |> should.equal("InvalidAccessKeyId")
+
+  message
+  |> should.equal(
+    "The Access Key Id you provided does not exist in our records.",
+  )
+
+  request_id
+  |> should.not_equal("")
+
+  resource
+  |> should.equal("/")
+}
+
 // TODO: other error codes
 pub fn list_buckets_test() {
   helpers.delete_existing_buckets()
