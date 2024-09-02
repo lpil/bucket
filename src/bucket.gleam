@@ -6,8 +6,11 @@ pub type BucketError {
   InvalidXmlSyntaxError(String)
   UnexpectedXmlFormatError(String)
   UnexpectedResponseError(Response(BitArray))
-  S3Error(
-    http_status: Int,
+  S3Error(http_status: Int, error: ErrorObject)
+}
+
+pub type ErrorObject {
+  ErrorObject(
     code: String,
     message: String,
     resource: String,

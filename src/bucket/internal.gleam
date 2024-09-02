@@ -1,10 +1,9 @@
 import aws4_request
 import bucket.{
-  type BucketError, type Credentials, InvalidXmlSyntaxError,
-  UnexpectedXmlFormatError,
+  type BucketError, type Credentials, type ErrorObject, ErrorObject,
+  InvalidXmlSyntaxError, UnexpectedXmlFormatError,
 }
-import bucket/internal/xml
-import gleam/dict.{type Dict}
+import bucket/internal/xml.{type ElementParser}
 import gleam/http
 import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
@@ -62,54 +61,24 @@ pub fn request(
   |> aws4_request.sign_bits(request)
 }
 
-pub type ElementParser(parent) {
-  ElementParser(
-    tag: String,
-    handler: fn(parent, xmlm.Input) ->
-      Result(#(parent, xmlm.Input), BucketError),
-  )
-}
-
-pub type ElementParserBuilder(data) {
-  ElementParserBuilder(
-    data: data,
-    tag: String,
-    children: Dict(
-      String,
-      fn(data, xmlm.Input) -> Result(#(data, xmlm.Input), BucketError),
-    ),
-  )
-}
-
-type S3Err {
-  S3Error(
-    http_status: Int,
-    code: String,
-    message: String,
-    resource: String,
-    request_id: String,
-  )
-}
-
-fn s3_error_to_bucket_error(t) {
-  let S3Error(http_status:, code:, message:, resource:, request_id:) = t
-  bucket.S3Error(http_status:, code:, message:, resource:, request_id:)
+pub fn error_object() -> ElementParser(ErrorObject, ErrorObject) {
+  xml.element("Error", ErrorObject("", "", "", ""))
+  |> xml.keep_text("Code", fn(error, code) { ErrorObject(..error, code:) })
+  |> xml.keep_text("Message", fn(error, message) {
+    ErrorObject(..error, message:)
+  })
+  |> xml.keep_text("Resource", fn(error, resource) {
+    ErrorObject(..error, resource:)
+  })
+  |> xml.keep_text("RequestId", fn(error, request_id) {
+    ErrorObject(..error, request_id:)
+  })
 }
 
 pub fn s3_error(response: Response(BitArray)) -> Result(a, BucketError) {
   let parsed =
-    xml.element("Error", S3Error(response.status, "", "", "", ""))
-    |> xml.keep_text("Code", fn(error, code) { S3Error(..error, code:) })
-    |> xml.keep_text("Message", fn(error, message) {
-      S3Error(..error, message:)
-    })
-    |> xml.keep_text("Resource", fn(error, resource) {
-      S3Error(..error, resource:)
-    })
-    |> xml.keep_text("RequestId", fn(error, request_id) {
-      S3Error(..error, request_id:)
-    })
-    |> xml.map(s3_error_to_bucket_error)
+    error_object()
+    |> xml.map(bucket.S3Error(response.status, _))
     |> xml.parse(response.body)
 
   case parsed {

@@ -1,6 +1,7 @@
-import bucket
+import bucket.{ErrorObject, S3Error}
 import bucket/create_bucket
 import bucket/delete_bucket
+import bucket/delete_objects
 import bucket/list_buckets.{ListAllMyBucketsResult}
 import bucket/list_objects
 import bucket/put_object
@@ -22,12 +23,9 @@ pub fn list_buckets_bad_creds_test() {
     |> list_buckets.build(helpers.bad_creds)
     |> httpc.send_bits
   let assert Error(res) = list_buckets.response(res)
-  let assert bucket.S3Error(
+  let assert S3Error(
     http_status:,
-    code:,
-    message:,
-    request_id:,
-    resource:,
+    error: ErrorObject(code:, message:, request_id:, resource:),
   ) = res
 
   http_status
@@ -116,10 +114,12 @@ pub fn create_bucket_invalid_test() {
     "</CreateBucketConfiguration>":utf8,
   >>)
   let assert Ok(res) = httpc.send_bits(req)
-  let assert Error(bucket.S3Error(
+  let assert Error(S3Error(
     http_status: 400,
-    code: "InvalidBucketName",
-    ..,
+    error: ErrorObject(
+      code: "InvalidBucketName",
+      ..,
+    ),
   )) = create_bucket.response(res)
 
   helpers.get_existing_bucket_names()
@@ -140,10 +140,12 @@ pub fn create_bucket_already_created_test() {
     "</CreateBucketConfiguration>":utf8,
   >>)
   let assert Ok(res) = httpc.send_bits(req)
-  let assert Error(bucket.S3Error(
+  let assert Error(S3Error(
     http_status: 409,
-    code: "BucketAlreadyOwnedByYou",
-    ..,
+    error: ErrorObject(
+      code: "BucketAlreadyOwnedByYou",
+      ..,
+    ),
   )) = create_bucket.response(res)
 
   helpers.get_existing_bucket_names()
@@ -183,8 +185,13 @@ pub fn delete_not_found_test() {
     delete_bucket.request(name: "bucket1")
     |> delete_bucket.build(helpers.creds)
     |> httpc.send_bits
-  let assert Error(bucket.S3Error(http_status: 404, code: "NoSuchBucket", ..)) =
-    delete_bucket.response(res)
+  let assert Error(S3Error(
+    http_status: 404,
+    error: ErrorObject(
+      code: "NoSuchBucket",
+      ..,
+    ),
+  )) = delete_bucket.response(res)
 }
 
 pub fn put_object_test() {
@@ -224,3 +231,27 @@ pub fn list_objects_test() {
   let assert list_objects.Object(key: "o/2", size: 3, ..) = object2
   let assert list_objects.Object(key: "o/3", size: 5, ..) = object3
 }
+
+pub fn delete_objects_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+  helpers.create_object("bucket", "o/1", <<"one":utf8>>)
+  helpers.create_object("bucket", "o/2", <<"two":utf8>>)
+  helpers.create_object("bucket", "o/3", <<"three":utf8>>)
+
+  let assert Ok(res) =
+    delete_objects.request("bucket", [
+      delete_objects.ObjectIdentifier(key: "o/1", version_id: option.None),
+      delete_objects.ObjectIdentifier(key: "o/2", version_id: option.None),
+      delete_objects.ObjectIdentifier(key: "o/3", version_id: option.None),
+    ])
+    |> delete_objects.build(helpers.creds)
+    |> httpc.send_bits
+
+  let assert Ok([
+    Ok(delete_objects.Deleted(key: "o/3", version_id: "")),
+    Ok(delete_objects.Deleted(key: "o/2", version_id: "")),
+    Ok(delete_objects.Deleted(key: "o/1", version_id: "")),
+  ]) = delete_objects.response(res)
+}
+// TODO: delete objects partial failure

@@ -1,5 +1,6 @@
-import bucket.{type BucketError, type Credentials}
+import bucket.{type BucketError, type Credentials, type ErrorObject, ErrorObject}
 import bucket/internal
+import bucket/internal/xml
 import gleam/bit_array
 import gleam/crypto
 import gleam/http
@@ -16,6 +17,10 @@ pub type RequestBuilder {
 
 pub type ObjectIdentifier {
   ObjectIdentifier(key: String, version_id: Option(String))
+}
+
+pub type Deleted {
+  Deleted(key: String, version_id: String)
 }
 
 pub fn request(
@@ -63,10 +68,25 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
   )
 }
 
-// TODO: parse response
-pub fn response(response: Response(BitArray)) -> Result(Nil, BucketError) {
+pub fn response(
+  response: Response(BitArray),
+) -> Result(List(Result(Deleted, ErrorObject)), BucketError) {
   case response.status {
-    200 -> Ok(Nil)
+    200 -> response_success(response)
     _ -> internal.s3_error(response)
   }
+}
+
+fn response_success(
+  response: Response(BitArray),
+) -> Result(List(Result(Deleted, ErrorObject)), BucketError) {
+  let deleted =
+    xml.element("Deleted", Deleted("", ""))
+    |> xml.keep_text("Key", fn(a, e) { Deleted(..a, key: e) })
+    |> xml.keep_text("VersionId", fn(a, e) { Deleted(..a, key: e) })
+
+  xml.element("DeleteResult", [])
+  |> xml.keep(deleted, fn(a, e) { [Ok(e), ..a] })
+  |> xml.keep(internal.error_object(), fn(a, e) { [Error(e), ..a] })
+  |> xml.parse(response.body)
 }
