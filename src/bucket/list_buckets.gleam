@@ -48,7 +48,7 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
     #("continuation-token", builder.continuation_token),
     #("max-buckets", option.map(builder.max_buckets, int.to_string)),
   ]
-  internal.request(creds, http.Get, "", query, <<>>)
+  internal.request(creds, http.Get, "", query, [], <<>>)
 }
 
 pub fn response(

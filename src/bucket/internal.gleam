@@ -22,11 +22,12 @@ pub fn error_xml_format(signal: xmlm.Signal) -> Result(a, BucketError) {
 }
 
 pub fn request(
-  creds: Credentials,
-  method: http.Method,
-  path: String,
-  query: List(#(String, Option(String))),
-  body: BitArray,
+  creds creds: Credentials,
+  method method: http.Method,
+  path path: String,
+  query query: List(#(String, Option(String))),
+  headers headers: List(#(String, String)),
+  body body: BitArray,
 ) -> Request(BitArray) {
   let query =
     query
@@ -42,7 +43,16 @@ pub fn request(
     _ -> option.Some(query)
   }
   let request =
-    Request(method, [], body, creds.scheme, creds.host, creds.port, path, query)
+    Request(
+      method,
+      headers,
+      body,
+      creds.scheme,
+      creds.host,
+      creds.port,
+      path,
+      query,
+    )
   aws4_request.signer(
     creds.access_key_id,
     creds.secret_access_key,

@@ -2,6 +2,8 @@ import bucket
 import bucket/create_bucket
 import bucket/delete_bucket
 import bucket/list_buckets.{ListAllMyBucketsResult}
+import bucket/list_objects
+import bucket/put_object
 import gleam/httpc
 import gleam/list
 import gleam/option
@@ -183,4 +185,42 @@ pub fn delete_not_found_test() {
     |> httpc.send_bits
   let assert Error(bucket.S3Error(http_status: 404, code: "NoSuchBucket", ..)) =
     delete_bucket.response(res)
+}
+
+pub fn put_object_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+
+  let assert Ok(res) =
+    put_object.request(bucket: "bucket", key: "my/object/1", body: <<
+      "Hello, Joe!":utf8,
+    >>)
+    |> put_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(put_object.PutObjectResult(etag:)) = put_object.response(res)
+  etag |> should.not_equal("")
+}
+
+pub fn list_objects_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+  helpers.create_object("bucket", "o/1", <<"one":utf8>>)
+  helpers.create_object("bucket", "o/2", <<"two":utf8>>)
+  helpers.create_object("bucket", "o/3", <<"three":utf8>>)
+
+  let assert Ok(res) =
+    list_objects.request("bucket")
+    |> list_objects.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(list_objects.ListObjectsResult(
+    is_truncated: False,
+    contents: [object3, object2, object1],
+  )) = list_objects.response(res)
+
+  let assert list_objects.Object(key: "o/1", last_modified:, etag:, size: 3) =
+    object1
+  etag |> should.not_equal("")
+  last_modified |> should.not_equal("")
+  let assert list_objects.Object(key: "o/2", size: 3, ..) = object2
+  let assert list_objects.Object(key: "o/3", size: 5, ..) = object3
 }

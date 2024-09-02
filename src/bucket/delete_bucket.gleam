@@ -28,7 +28,7 @@ pub fn expected_bucket_owner(
 }
 
 pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
-  internal.request(creds, http.Delete, "/" <> builder.name, [], <<>>)
+  internal.request(creds, http.Delete, "/" <> builder.name, [], [], <<>>)
 }
 
 pub fn response(response: Response(BitArray)) -> Result(Nil, BucketError) {

@@ -37,7 +37,7 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
     |> xmb.render_fragment
     |> string_builder.to_string
     |> bit_array.from_string
-  internal.request(creds, http.Put, "/" <> builder.name, [], body)
+  internal.request(creds, http.Put, "/" <> builder.name, [], [], body)
 }
 
 pub fn response(response: Response(BitArray)) -> Result(Nil, BucketError) {

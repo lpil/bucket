@@ -1,6 +1,7 @@
 import bucket.{type BucketError, InvalidXmlSyntaxError, UnexpectedXmlFormatError}
 import gleam/dict.{type Dict}
 import gleam/function
+import gleam/int
 import gleam/result
 import xmlm
 
@@ -96,6 +97,46 @@ pub fn keep_text(
   let handler = fn(parent_data, input) {
     case text_element(input) {
       Ok(#(child_data, input)) -> Ok(#(reduce(parent_data, child_data), input))
+      Error(error) -> Error(error)
+    }
+  }
+  ElementParser(
+    ..builder,
+    children: dict.insert(builder.children, tag, handler),
+  )
+}
+
+pub fn keep_bool(
+  builder: ElementParser(parent_data, output),
+  tag: String,
+  reduce: fn(parent_data, Bool) -> parent_data,
+) -> ElementParser(parent_data, output) {
+  let handler = fn(parent_data, input) {
+    case text_element(input) {
+      Ok(#("true", input)) -> Ok(#(reduce(parent_data, True), input))
+      Ok(#("false", input)) -> Ok(#(reduce(parent_data, False), input))
+      Ok(#(other, _)) -> Error(bucket.UnexpectedXmlFormatError(other))
+      Error(error) -> Error(error)
+    }
+  }
+  ElementParser(
+    ..builder,
+    children: dict.insert(builder.children, tag, handler),
+  )
+}
+
+pub fn keep_int(
+  builder: ElementParser(parent_data, output),
+  tag: String,
+  reduce: fn(parent_data, Int) -> parent_data,
+) -> ElementParser(parent_data, output) {
+  let handler = fn(parent_data, input) {
+    case text_element(input) {
+      Ok(#(data, input)) ->
+        case int.parse(data) {
+          Ok(i) -> Ok(#(reduce(parent_data, i), input))
+          Error(Nil) -> Error(bucket.UnexpectedXmlFormatError(data))
+        }
       Error(error) -> Error(error)
     }
   }
