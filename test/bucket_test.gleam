@@ -5,6 +5,7 @@ import bucket/list_buckets.{ListAllMyBucketsResult}
 import gleam/httpc
 import gleam/list
 import gleam/option
+import gleam/uri
 import gleeunit
 import gleeunit/should
 import helpers
@@ -45,7 +46,6 @@ pub fn list_buckets_bad_creds_test() {
   |> should.equal("/")
 }
 
-// TODO: other error codes
 pub fn list_buckets_test() {
   helpers.delete_existing_buckets()
 
@@ -76,7 +76,6 @@ pub fn list_buckets_test() {
   |> should.equal(["bucket3", "bucket2", "bucket1"])
 }
 
-// TODO: other error codes
 pub fn create_bucket_test() {
   helpers.delete_existing_buckets()
 
@@ -102,7 +101,53 @@ pub fn create_bucket_test() {
   |> should.equal(["bucket2", "bucket1"])
 }
 
-// TODO: other error codes
+pub fn create_bucket_invalid_test() {
+  helpers.delete_existing_buckets()
+
+  let req =
+    create_bucket.request(name: uri.percent_encode("%%%"))
+    |> create_bucket.build(helpers.creds)
+  req.body
+  |> should.equal(<<
+    "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
+    "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
+    "</CreateBucketConfiguration>":utf8,
+  >>)
+  let assert Ok(res) = httpc.send_bits(req)
+  let assert Error(bucket.S3Error(
+    http_status: 400,
+    code: "InvalidBucketName",
+    ..,
+  )) = create_bucket.response(res)
+
+  helpers.get_existing_bucket_names()
+  |> should.equal([])
+}
+
+pub fn create_bucket_already_created_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket1")
+
+  let req =
+    create_bucket.request(name: "bucket1")
+    |> create_bucket.build(helpers.creds)
+  req.body
+  |> should.equal(<<
+    "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
+    "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
+    "</CreateBucketConfiguration>":utf8,
+  >>)
+  let assert Ok(res) = httpc.send_bits(req)
+  let assert Error(bucket.S3Error(
+    http_status: 409,
+    code: "BucketAlreadyOwnedByYou",
+    ..,
+  )) = create_bucket.response(res)
+
+  helpers.get_existing_bucket_names()
+  |> should.equal(["bucket1"])
+}
+
 pub fn delete_test() {
   helpers.delete_existing_buckets()
 
@@ -127,4 +172,15 @@ pub fn delete_test() {
 
   helpers.get_existing_bucket_names()
   |> should.equal(["bucket1"])
+}
+
+pub fn delete_not_found_test() {
+  helpers.delete_existing_buckets()
+
+  let assert Ok(res) =
+    delete_bucket.request(name: "bucket1")
+    |> delete_bucket.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Error(bucket.S3Error(http_status: 404, code: "NoSuchBucket", ..)) =
+    delete_bucket.response(res)
 }

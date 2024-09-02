@@ -56,8 +56,7 @@ pub fn response(
 ) -> Result(ListAllMyBucketsResult, BucketError) {
   case response.status {
     200 -> response_success(response)
-    403 -> internal.forbidden_error(response)
-    got -> Error(bucket.UnexpectedHttpStatusError(expected: 200, got:))
+    _ -> internal.s3_error(response)
   }
 }
 

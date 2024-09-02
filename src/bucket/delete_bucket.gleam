@@ -3,7 +3,6 @@ import bucket/internal
 import gleam/http
 import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
-import gleam/int
 import gleam/option.{type Option}
 
 pub type RequestBuilder {
@@ -35,6 +34,6 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
 pub fn response(response: Response(BitArray)) -> Result(Nil, BucketError) {
   case response.status {
     204 -> Ok(Nil)
-    x -> todo as { "unexpected error " <> int.to_string(x) }
+    _ -> internal.s3_error(response)
   }
 }

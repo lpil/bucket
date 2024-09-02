@@ -1,10 +1,11 @@
 import gleam/http.{type Scheme}
+import gleam/http/response.{type Response}
 import gleam/option.{type Option}
 
 pub type BucketError {
   InvalidXmlSyntaxError(String)
   UnexpectedXmlFormatError(String)
-  UnexpectedHttpStatusError(expected: Int, got: Int)
+  UnexpectedResponseError(Response(BitArray))
   S3Error(
     http_status: Int,
     code: String,

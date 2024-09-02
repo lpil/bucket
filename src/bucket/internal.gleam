@@ -86,7 +86,7 @@ fn s3_error_to_bucket_error(t) {
   bucket.S3Error(http_status:, code:, message:, resource:, request_id:)
 }
 
-pub fn forbidden_error(response: Response(BitArray)) -> Result(a, BucketError) {
+pub fn s3_error(response: Response(BitArray)) -> Result(a, BucketError) {
   let parsed =
     xml.element("Error", S3Error(response.status, "", "", "", ""))
     |> xml.keep_text("Code", fn(error, code) { S3Error(..error, code:) })
@@ -104,6 +104,6 @@ pub fn forbidden_error(response: Response(BitArray)) -> Result(a, BucketError) {
 
   case parsed {
     Ok(e) -> Error(e)
-    Error(e) -> Error(e)
+    Error(_) -> Error(bucket.UnexpectedResponseError(response))
   }
 }
