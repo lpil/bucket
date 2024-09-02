@@ -1,4 +1,4 @@
-import bucket.{type Credentials, type BucketError}
+import bucket.{type BucketError, type Credentials}
 import bucket/internal
 import gleam/http
 import gleam/http/request.{type Request, Request}
@@ -29,7 +29,7 @@ pub fn expected_bucket_owner(
 }
 
 pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
-  internal.request(creds, http.Delete, "/" <> builder.name, <<>>)
+  internal.request(creds, http.Delete, "/" <> builder.name, [], <<>>)
 }
 
 pub fn response(response: Response(BitArray)) -> Result(Nil, BucketError) {

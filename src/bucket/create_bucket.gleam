@@ -1,4 +1,4 @@
-import bucket.{type Credentials, type BucketError}
+import bucket.{type BucketError, type Credentials}
 import bucket/internal
 import gleam/bit_array
 import gleam/http
@@ -38,7 +38,7 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
     |> xmb.render_fragment
     |> string_builder.to_string
     |> bit_array.from_string
-  internal.request(creds, http.Put, "/" <> builder.name, body)
+  internal.request(creds, http.Put, "/" <> builder.name, [], body)
 }
 
 pub fn response(response: Response(BitArray)) -> Result(Nil, BucketError) {

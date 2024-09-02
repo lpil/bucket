@@ -15,7 +15,9 @@ pub fn main() {
 
 pub fn list_buckets_bad_creds_test() {
   let assert Ok(res) =
-    list_buckets.request(helpers.bad_creds) |> httpc.send_bits
+    list_buckets.request()
+    |> list_buckets.build(helpers.bad_creds)
+    |> httpc.send_bits
   let assert Error(res) = list_buckets.response(res)
   let assert bucket.S3Error(
     http_status:,
@@ -47,7 +49,10 @@ pub fn list_buckets_bad_creds_test() {
 pub fn list_buckets_test() {
   helpers.delete_existing_buckets()
 
-  let assert Ok(res) = list_buckets.request(helpers.creds) |> httpc.send_bits
+  let assert Ok(res) =
+    list_buckets.request()
+    |> list_buckets.build(helpers.creds)
+    |> httpc.send_bits
   let assert Ok(res) = list_buckets.response(res)
   res
   |> should.equal(ListAllMyBucketsResult(
@@ -59,7 +64,10 @@ pub fn list_buckets_test() {
   helpers.create_bucket("bucket2")
   helpers.create_bucket("bucket3")
 
-  let assert Ok(res) = list_buckets.request(helpers.creds) |> httpc.send_bits
+  let assert Ok(res) =
+    list_buckets.request()
+    |> list_buckets.build(helpers.creds)
+    |> httpc.send_bits
   let assert Ok(res) = list_buckets.response(res)
   res.continuation_token
   |> should.equal(option.None)

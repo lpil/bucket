@@ -41,7 +41,11 @@ pub fn delete_existing_buckets() -> Nil {
 }
 
 pub fn get_existing_bucket_names() -> List(String) {
-  let assert Ok(res) = list_buckets.request(creds) |> httpc.send_bits
+  let assert Ok(res) =
+    list_buckets.request()
+    |> list_buckets.max_buckets(100)
+    |> list_buckets.build(creds)
+    |> httpc.send_bits
   let assert Ok(res) = list_buckets.response(res)
   list.map(res.buckets, fn(b) { b.name })
 }

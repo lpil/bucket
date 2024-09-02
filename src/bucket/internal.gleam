@@ -8,7 +8,9 @@ import gleam/dict.{type Dict}
 import gleam/http
 import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
-import gleam/option
+import gleam/list
+import gleam/option.{type Option}
+import gleam/uri
 import xmlm
 
 pub fn error_xml_syntax(e: xmlm.InputError) -> Result(a, BucketError) {
@@ -23,19 +25,24 @@ pub fn request(
   creds: Credentials,
   method: http.Method,
   path: String,
+  query: List(#(String, Option(String))),
   body: BitArray,
 ) -> Request(BitArray) {
+  let query =
+    query
+    |> list.filter_map(fn(pair) {
+      case pair.1 {
+        option.Some(value) -> Ok(#(pair.0, value))
+        _ -> Error(Nil)
+      }
+    })
+    |> uri.query_to_string
+  let query = case query {
+    "" -> option.None
+    _ -> option.Some(query)
+  }
   let request =
-    Request(
-      method,
-      [],
-      body,
-      creds.scheme,
-      creds.host,
-      creds.port,
-      path,
-      option.None,
-    )
+    Request(method, [], body, creds.scheme, creds.host, creds.port, path, query)
   aws4_request.signer(
     creds.access_key_id,
     creds.secret_access_key,
