@@ -10,6 +10,7 @@ pub type PutObjectResult {
   PutObjectResult(etag: String)
 }
 
+/// The parameters for the API request
 pub type RequestBuilder {
   RequestBuilder(bucket: String, key: String, body: BitArray)
 }

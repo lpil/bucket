@@ -12,6 +12,7 @@ import gleam/result
 import gleam/string_builder
 import xmb
 
+/// The parameters for the API request
 pub type RequestBuilder {
   RequestBuilder(bucket: String, objects: List(ObjectIdentifier))
 }

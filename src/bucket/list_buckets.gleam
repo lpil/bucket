@@ -14,6 +14,7 @@ pub type ListAllMyBucketsResult {
   )
 }
 
+/// The parameters for the API request
 pub type RequestBuilder {
   RequestBuilder(continuation_token: Option(String), max_buckets: Option(Int))
 }

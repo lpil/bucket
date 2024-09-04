@@ -15,6 +15,7 @@ pub type Object {
   Object(key: String, last_modified: String, etag: String, size: Int)
 }
 
+/// The parameters for the API request
 pub type RequestBuilder {
   RequestBuilder(
     bucket: String,

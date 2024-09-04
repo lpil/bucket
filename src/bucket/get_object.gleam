@@ -6,6 +6,7 @@ import gleam/http
 import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
 
+/// The parameters for the API request
 pub type RequestBuilder {
   RequestBuilder(bucket: String, key: String)
 }

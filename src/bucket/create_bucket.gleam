@@ -8,6 +8,7 @@ import gleam/option.{type Option}
 import gleam/string_builder
 import xmb
 
+/// The parameters for the API request
 pub type RequestBuilder {
   RequestBuilder(name: String, region: Option(String))
 }
