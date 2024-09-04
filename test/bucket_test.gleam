@@ -249,9 +249,8 @@ pub fn delete_objects_test() {
     |> httpc.send_bits
 
   let assert Ok([
-    Ok(delete_objects.Deleted(key: "o/3", version_id: "")),
-    Ok(delete_objects.Deleted(key: "o/2", version_id: "")),
     Ok(delete_objects.Deleted(key: "o/1", version_id: "")),
+    Ok(delete_objects.Deleted(key: "o/2", version_id: "")),
+    Ok(delete_objects.Deleted(key: "o/3", version_id: "")),
   ]) = delete_objects.response(res)
 }
-// TODO: delete objects partial failure

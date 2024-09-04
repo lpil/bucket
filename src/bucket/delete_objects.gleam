@@ -8,6 +8,7 @@ import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
 import gleam/list
 import gleam/option.{type Option}
+import gleam/result
 import gleam/string_builder
 import xmb
 
@@ -89,4 +90,5 @@ fn response_success(
   |> xml.keep(deleted, fn(a, e) { [Ok(e), ..a] })
   |> xml.keep(internal.error_object(), fn(a, e) { [Error(e), ..a] })
   |> xml.parse(response.body)
+  |> result.map(list.reverse)
 }
