@@ -74,5 +74,8 @@ fn response_success(
 
   xml.element("ListAllMyBucketsResult", ListAllMyBucketsResult([], option.None))
   |> xml.keep(buckets, fn(d, b) { ListAllMyBucketsResult(..d, buckets: b) })
+  |> xml.keep_text("ContinuationToken", fn(d, b) {
+    ListAllMyBucketsResult(..d, continuation_token: option.Some(b))
+  })
   |> xml.parse(response.body)
 }
