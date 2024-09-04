@@ -57,8 +57,6 @@ pub fn main() {
 
 The following endpoints are supported:
 
-https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
-
 - [CreateBucket](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
 - [DeleteBucket](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucket.html)
 - [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
