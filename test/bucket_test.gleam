@@ -2,6 +2,7 @@ import bucket.{ErrorObject, S3Error}
 import bucket/create_bucket
 import bucket/delete_bucket
 import bucket/delete_objects
+import bucket/get_object
 import bucket/head_bucket
 import bucket/head_object
 import bucket/list_buckets.{ListAllMyBucketsResult}
@@ -335,4 +336,37 @@ pub fn head_object_if_match_not_matching_test() {
     |> head_object.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(head_object.PreconditionFailed) = head_object.response(res)
+}
+
+pub fn get_object_bucket_not_found_test() {
+  helpers.delete_existing_buckets()
+
+  let assert Ok(res) =
+    get_object.request("bucket", "key")
+    |> get_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(get_object.NotFound) = get_object.response(res)
+}
+
+pub fn get_object_object_not_found_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+
+  let assert Ok(res) =
+    get_object.request("bucket", "key")
+    |> get_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(get_object.NotFound) = get_object.response(res)
+}
+
+pub fn get_object_found_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+  helpers.create_object("bucket", "key", <<"yes":utf8>>)
+
+  let assert Ok(res) =
+    get_object.request("bucket", "key")
+    |> get_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(get_object.Found(<<"yes":utf8>>)) = get_object.response(res)
 }
