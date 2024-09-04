@@ -55,4 +55,19 @@ pub fn main() {
 }
 ```
 
+The following endpoints are supported:
+
+https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
+
+- [CreateBucket](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+- [DeleteBucket](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucket.html)
+- [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
+- [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
+- [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
+- [HeadBucket](https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadBucket.html)
+- [HeadObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html)
+- [ListBuckets](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListBuckets.html)
+- [ListObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjects.html)
+- [PutObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html)
+
 Further documentation can be found at <https://hexdocs.pm/bucket>.
