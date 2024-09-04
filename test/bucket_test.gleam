@@ -2,6 +2,7 @@ import bucket.{ErrorObject, S3Error}
 import bucket/create_bucket
 import bucket/delete_bucket
 import bucket/delete_objects
+import bucket/head_bucket
 import bucket/list_buckets.{ListAllMyBucketsResult}
 import bucket/list_objects
 import bucket/put_object
@@ -253,4 +254,25 @@ pub fn delete_objects_test() {
     Ok(delete_objects.Deleted(key: "o/2", version_id: "")),
     Ok(delete_objects.Deleted(key: "o/3", version_id: "")),
   ]) = delete_objects.response(res)
+}
+
+pub fn head_bucket_not_found_test() {
+  helpers.delete_existing_buckets()
+
+  let assert Ok(res) =
+    head_bucket.request("whatever")
+    |> head_bucket.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(False) = head_bucket.response(res)
+}
+
+pub fn head_bucket_found_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("whatever")
+
+  let assert Ok(res) =
+    head_bucket.request("whatever")
+    |> head_bucket.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(True) = head_bucket.response(res)
 }
