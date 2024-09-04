@@ -2,6 +2,7 @@ import bucket
 import bucket/create_bucket
 import bucket/delete_bucket
 import bucket/delete_objects
+import bucket/head_object
 import bucket/list_buckets
 import bucket/list_objects
 import bucket/put_object
@@ -87,4 +88,13 @@ fn delete_bucket(name: String) -> Nil {
       Nil
     }
   }
+}
+
+pub fn does_object_exist(bucket: String, key: String) -> Bool {
+  let assert Ok(res) =
+    head_object.request(bucket, key)
+    |> head_object.build(creds)
+    |> httpc.send_bits
+  let assert Ok(res) = head_object.response(res)
+  res == head_object.Found
 }

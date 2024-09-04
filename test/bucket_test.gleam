@@ -1,6 +1,7 @@
 import bucket.{ErrorObject, S3Error}
 import bucket/create_bucket
 import bucket/delete_bucket
+import bucket/delete_object
 import bucket/delete_objects
 import bucket/get_object
 import bucket/head_bucket
@@ -369,4 +370,33 @@ pub fn get_object_found_test() {
     |> get_object.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(get_object.Found(<<"yes":utf8>>)) = get_object.response(res)
+}
+
+pub fn delete_object_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+  helpers.create_object("bucket", "key", <<"ok":utf8>>)
+
+  helpers.does_object_exist("bucket", "key")
+  |> should.be_true
+
+  let assert Ok(res) =
+    delete_object.request(bucket: "bucket", key: "key")
+    |> delete_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(Nil) = delete_object.response(res)
+
+  helpers.does_object_exist("bucket", "key")
+  |> should.be_false
+}
+
+pub fn delete_object_not_found_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+
+  let assert Ok(res) =
+    delete_object.request(bucket: "bucket", key: "key")
+    |> delete_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(Nil) = delete_object.response(res)
 }
