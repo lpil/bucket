@@ -1,4 +1,4 @@
-//// <https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadBucket.html#API_HeadBucket_RequestSyntax>
+//// <https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadBucket.html>
 
 import bucket.{type BucketError, type Credentials}
 import bucket/internal

@@ -3,6 +3,7 @@ import bucket/create_bucket
 import bucket/delete_bucket
 import bucket/delete_objects
 import bucket/head_bucket
+import bucket/head_object
 import bucket/list_buckets.{ListAllMyBucketsResult}
 import bucket/list_objects
 import bucket/put_object
@@ -260,7 +261,7 @@ pub fn head_bucket_not_found_test() {
   helpers.delete_existing_buckets()
 
   let assert Ok(res) =
-    head_bucket.request("whatever")
+    head_bucket.request("bucket")
     |> head_bucket.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(False) = head_bucket.response(res)
@@ -268,11 +269,70 @@ pub fn head_bucket_not_found_test() {
 
 pub fn head_bucket_found_test() {
   helpers.delete_existing_buckets()
-  helpers.create_bucket("whatever")
+  helpers.create_bucket("bucket")
 
   let assert Ok(res) =
-    head_bucket.request("whatever")
+    head_bucket.request("bucket")
     |> head_bucket.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(True) = head_bucket.response(res)
+}
+
+pub fn head_object_bucket_not_found_test() {
+  helpers.delete_existing_buckets()
+
+  let assert Ok(res) =
+    head_object.request("bucket", "key")
+    |> head_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(head_object.NotFound) = head_object.response(res)
+}
+
+pub fn head_object_object_not_found_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+
+  let assert Ok(res) =
+    head_object.request("bucket", "key")
+    |> head_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(head_object.NotFound) = head_object.response(res)
+}
+
+pub fn head_object_found_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+  helpers.create_object("bucket", "key", <<"yes":utf8>>)
+
+  let assert Ok(res) =
+    head_object.request("bucket", "key")
+    |> head_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(head_object.Found) = head_object.response(res)
+}
+
+pub fn head_object_if_match_matching_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+  helpers.create_object("bucket", "key", <<"yes":utf8>>)
+
+  let assert Ok(res) =
+    head_object.request("bucket", "key")
+    |> head_object.if_match(etag: "a6105c0a611b41b08f1209506350279e")
+    |> head_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(head_object.Found) = head_object.response(res)
+}
+
+pub fn head_object_if_match_not_matching_test() {
+  helpers.delete_existing_buckets()
+  helpers.create_bucket("bucket")
+  helpers.create_object("bucket", "key", <<"yes":utf8>>)
+
+  let assert Ok(res) =
+    head_object.request("bucket", "key")
+    |> head_object.if_match(etag: "some-other-etag")
+    |> head_object.build(helpers.creds)
+    |> httpc.send_bits
+  let assert Ok(head_object.PreconditionFailed) = head_object.response(res)
 }
