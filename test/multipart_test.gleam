@@ -4,7 +4,6 @@ import bucket/get_object
 import bucket/upload_part
 import gleam/bit_array
 import gleam/httpc
-import gleam/int
 import gleam/list
 import gleam/string
 import gleeunit/should
@@ -27,16 +26,17 @@ pub fn perform_multipart_upload_test() {
   should.equal(res.key, key)
   should.not_equal(res.upload_id, "")
 
-  // Upload some parts (they can be sent in any order)
-  let upload_id = res.upload_id
+  // Upload some parts (they can be sent in parallel)
   // NOTE: The minimum Part size for multipart upload is 5MiB (hardcoded in minio)
+  let upload_id = res.upload_id
   let part_size = 5 * 1024 * 1024
   let part1 = get_random_bytes(part_size)
   let part2 = get_random_bytes(part_size)
+  let part3 = <<"Goodbye!":utf8>>
   let parts =
-    [#(<<"Goodbye!":utf8>>, 3), #(part1, 1), #(part2, 2)]
-    |> list.map(fn(pair) {
-      let #(body, part_number) = pair
+    [part1, part2, part3]
+    |> list.index_map(fn(body, i) {
+      let part_number = i + 1
       let assert Ok(res) =
         upload_part.request(bucket:, key:, upload_id:, part_number:, body:)
         |> upload_part.build(helpers.creds)
@@ -48,8 +48,6 @@ pub fn perform_multipart_upload_test() {
 
   // Complete the multipart upload
   // NOTE: The Parts must be sorted in ascending order for this operation
-  let parts =
-    list.sort(parts, fn(pa, pb) { int.compare(pa.part_number, pb.part_number) })
   let assert Ok(res) =
     complete_multipart_upload.request(bucket:, key:, upload_id:, parts:)
     |> complete_multipart_upload.build(helpers.creds)
@@ -60,7 +58,7 @@ pub fn perform_multipart_upload_test() {
   should.equal(res.key, key)
   should.not_equal(res.etag, "")
 
-  // Get the object and verify its contents
+  // Get the uploaded object and verify its contents
   let assert Ok(res) =
     get_object.request(bucket, key)
     |> get_object.build(helpers.creds)
@@ -77,7 +75,7 @@ pub fn perform_multipart_upload_test() {
   )
   should.equal(
     bit_array.slice(from: contents, at: 2 * part_size, take: 8),
-    Ok(<<"Goodbye!":utf8>>),
+    Ok(part3),
   )
 }
 
