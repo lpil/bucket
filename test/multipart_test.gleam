@@ -30,13 +30,11 @@ pub fn perform_multipart_upload_test() {
   // Upload some parts (they can be sent in any order)
   let upload_id = res.upload_id
   // NOTE: The minimum Part size for multipart upload is 5MiB (hardcoded in minio)
-  let megabyte = 1024 * 1024
+  let part_size = 5 * 1024 * 1024
+  let part1 = get_random_bytes(part_size)
+  let part2 = get_random_bytes(part_size)
   let parts =
-    [
-      #(string.repeat("B", 5 * megabyte) |> bit_array.from_string, 2),
-      #(string.repeat("A", 5 * megabyte) |> bit_array.from_string, 1),
-      #(<<"Goodbye!":utf8>>, 3),
-    ]
+    [#(<<"Goodbye!":utf8>>, 3), #(part1, 1), #(part2, 2)]
     |> list.map(fn(pair) {
       let #(body, part_number) = pair
       let assert Ok(res) =
@@ -68,11 +66,20 @@ pub fn perform_multipart_upload_test() {
     |> get_object.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(get_object.Found(contents)) = get_object.response(res)
-  should.equal(bit_array.byte_size(contents), 2 * 5 * megabyte + 8)
-  let assert Ok(<<"AAAA":utf8>>) =
-    bit_array.slice(from: contents, at: 1, take: 4)
-  let assert Ok(<<"AABB":utf8>>) =
-    bit_array.slice(from: contents, at: 5 * megabyte - 2, take: 4)
-  let assert Ok(<<"BBGoodbye!":utf8>>) =
-    bit_array.slice(from: contents, at: 2 * 5 * megabyte + 8, take: -10)
+  should.equal(bit_array.byte_size(contents), 2 * part_size + 8)
+  should.equal(
+    bit_array.slice(from: contents, at: 0, take: part_size),
+    Ok(part1),
+  )
+  should.equal(
+    bit_array.slice(from: contents, at: part_size, take: part_size),
+    Ok(part2),
+  )
+  should.equal(
+    bit_array.slice(from: contents, at: 2 * part_size, take: 8),
+    Ok(<<"Goodbye!":utf8>>),
+  )
 }
+
+@external(erlang, "rand", "bytes")
+pub fn get_random_bytes(num_bytes: Int) -> BitArray
