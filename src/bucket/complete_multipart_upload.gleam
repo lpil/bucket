@@ -8,7 +8,6 @@ import gleam/http/response.{type Response}
 import gleam/int
 import gleam/list
 import gleam/option
-import gleam/result
 import gleam/string_builder
 import xmb
 
