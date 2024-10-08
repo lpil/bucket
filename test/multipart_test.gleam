@@ -27,7 +27,7 @@ pub fn perform_multipart_upload_test() {
   should.not_equal(res.upload_id, "")
 
   // Upload some parts (they can be sent in parallel)
-  // NOTE: The minimum Part size for multipart upload is 5MiB (hardcoded in minio)
+  // NOTE: The minimum Part size for multipart upload is 5MiB, except the last part.
   let upload_id = res.upload_id
   let part_size = 5 * 1024 * 1024
   let part1 = get_random_bytes(part_size)
