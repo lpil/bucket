@@ -1,3 +1,5 @@
+//// <https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html>
+
 import bucket.{type BucketError, type Credentials}
 import bucket/internal
 import bucket/internal/xml
