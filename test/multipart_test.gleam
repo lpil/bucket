@@ -47,7 +47,6 @@ pub fn perform_multipart_upload_test() {
     })
 
   // Complete the multipart upload
-  // NOTE: The Parts must be sorted in ascending order for this operation
   let assert Ok(res) =
     complete_multipart_upload.request(bucket:, key:, upload_id:, parts:)
     |> complete_multipart_upload.build(helpers.creds)
