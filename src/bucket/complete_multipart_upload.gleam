@@ -42,10 +42,6 @@ pub fn request(
   upload_id upload_id: String,
   parts parts: List(Part),
 ) -> RequestBuilder {
-  let parts =
-    // Sort parts by part_number so the user doesn't have to. If the parts weren't sorted,
-    // the CompleteMultipartUpload request would fail.
-    list.sort(parts, fn(a, b) { int.compare(a.part_number, b.part_number) })
   RequestBuilder(bucket:, key:, upload_id:, parts:)
 }
 
