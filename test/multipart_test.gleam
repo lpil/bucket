@@ -30,8 +30,8 @@ pub fn perform_multipart_upload_test() {
   // NOTE: The minimum Part size for multipart upload is 5MiB, except the last part.
   let upload_id = res.upload_id
   let part_size = 5 * 1024 * 1024
-  let part1 = get_random_bytes(part_size)
-  let part2 = get_random_bytes(part_size)
+  let part1 = helpers.get_random_bytes(part_size)
+  let part2 = helpers.get_random_bytes(part_size)
   let part3 = <<"Goodbye!":utf8>>
   let parts =
     [part1, part2, part3]
@@ -77,6 +77,3 @@ pub fn perform_multipart_upload_test() {
     Ok(part3),
   )
 }
-
-@external(erlang, "rand", "bytes")
-pub fn get_random_bytes(num_bytes: Int) -> BitArray
