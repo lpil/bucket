@@ -146,7 +146,7 @@ pub fn entity_too_small_test() {
   |> should.equal("/" <> bucket <> "/" <> key)
 }
 
-// Attempt to complete a multipart upload with an incorrect ETag in one of the parts
+/// Attempt to complete a multipart upload with an incorrect ETag in one of the parts
 pub fn invalid_part_test() {
   // Set up a test bucket
   helpers.delete_existing_buckets()
@@ -198,7 +198,7 @@ pub fn invalid_part_test() {
   |> should.equal("/" <> bucket <> "/" <> key)
 }
 
-// Attempt to complete a multipart upload with parts in an invalid order
+/// Attempt to complete a multipart upload with parts in an invalid order
 pub fn invalid_part_order_test() {
   // Set up a test bucket
   helpers.delete_existing_buckets()
