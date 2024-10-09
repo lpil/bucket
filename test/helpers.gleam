@@ -98,3 +98,6 @@ pub fn does_object_exist(bucket: String, key: String) -> Bool {
   let assert Ok(res) = head_object.response(res)
   res == head_object.Found
 }
+
+@external(erlang, "rand", "bytes")
+pub fn get_random_bytes(num_bytes: Int) -> BitArray
