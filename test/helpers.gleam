@@ -2,6 +2,7 @@ import bucket
 import bucket/create_bucket
 import bucket/delete_bucket
 import bucket/delete_objects
+import bucket/get_object
 import bucket/head_object
 import bucket/list_buckets
 import bucket/list_objects
@@ -97,6 +98,15 @@ pub fn does_object_exist(bucket: String, key: String) -> Bool {
     |> httpc.send_bits
   let assert Ok(res) = head_object.response(res)
   res == head_object.Found
+}
+
+pub fn get_object(bucket: String, key: String) -> BitArray {
+  let assert Ok(res) =
+    get_object.request(bucket, key)
+    |> get_object.build(creds)
+    |> httpc.send_bits
+  let assert Ok(get_object.Found(contents)) = get_object.response(res)
+  contents
 }
 
 @external(erlang, "rand", "bytes")

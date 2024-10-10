@@ -1,7 +1,6 @@
 import bucket.{ErrorObject, S3Error}
 import bucket/complete_multipart_upload
 import bucket/create_multipart_upload
-import bucket/get_object
 import bucket/upload_part
 import gleam/bit_array
 import gleam/httpc
@@ -60,11 +59,7 @@ pub fn perform_multipart_upload_test() {
   should.not_equal(res.etag, "")
 
   // Get the uploaded object and verify its contents
-  let assert Ok(res) =
-    get_object.request(bucket, key)
-    |> get_object.build(helpers.creds)
-    |> httpc.send_bits
-  let assert Ok(get_object.Found(contents)) = get_object.response(res)
+  let contents = helpers.get_object(bucket, key)
   should.equal(bit_array.byte_size(contents), 2 * part_size + 8)
   should.equal(
     bit_array.slice(from: contents, at: 0, take: part_size),
