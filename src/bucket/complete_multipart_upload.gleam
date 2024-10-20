@@ -1,4 +1,6 @@
 //// <https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html>
+////
+//// CompleteMultipartUpload operation creates a new object by combining the specified parts. You may omit any number of parts, but they must be specified in ascending order.
 
 import bucket.{type BucketError, type Credentials}
 import bucket/internal
