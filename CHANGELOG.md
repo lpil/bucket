@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Added support for `CreateMultipartUpload`, `UploadPart` and `CompleteMultipartUpload` operations.
+- Added support for `CreateMultipartUpload`, `UploadPart` and
+  `CompleteMultipartUpload` operations.
 
 ## v1.0.0 - 2024-09-04
 
