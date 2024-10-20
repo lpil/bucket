@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added support for `CreateMultipartUpload`, `UploadPart` and `CompleteMultipartUpload` operations.
+
 ## v1.0.0 - 2024-09-04
 
 - Initial release with create_bucket, delete_bucket, delete_object,
