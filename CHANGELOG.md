@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v1.2.0 - 2024-12-07
+
+- Updated for `gleam_stdlib` v0.45.0.
+
+## v1.1.0 - 2024-10-20
 
 - Added support for `CreateMultipartUpload`, `UploadPart` and
   `CompleteMultipartUpload` operations.
