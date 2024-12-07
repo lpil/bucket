@@ -9,7 +9,7 @@ import gleam/http/response.{type Response}
 import gleam/list
 import gleam/option.{type Option}
 import gleam/result
-import gleam/string_builder
+import gleam/string_tree
 import xmb
 
 /// The parameters for the API request
@@ -51,7 +51,7 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
     )
     |> list.wrap
     |> xmb.render
-    |> string_builder.to_string
+    |> string_tree.to_string
     |> bit_array.from_string
   let query = [#("delete", option.Some(""))]
   let headers = [

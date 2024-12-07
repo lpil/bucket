@@ -12,7 +12,7 @@ import gleam/http/response.{type Response}
 import gleam/int
 import gleam/list
 import gleam/option
-import gleam/string_builder
+import gleam/string_tree
 import xmb
 
 pub type CompleteMultipartUploadResult {
@@ -60,7 +60,7 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
       }),
     )
     |> xmb.render_fragment
-    |> string_builder.to_string
+    |> string_tree.to_string
     |> bit_array.from_string
   internal.request(
     creds,

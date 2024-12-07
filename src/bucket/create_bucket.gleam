@@ -5,7 +5,7 @@ import gleam/http
 import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
 import gleam/option.{type Option}
-import gleam/string_builder
+import gleam/string_tree
 import xmb
 
 /// The parameters for the API request
@@ -36,7 +36,7 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
       ],
     )
     |> xmb.render_fragment
-    |> string_builder.to_string
+    |> string_tree.to_string
     |> bit_array.from_string
   internal.request(creds, http.Put, "/" <> builder.name, [], [], body)
 }
