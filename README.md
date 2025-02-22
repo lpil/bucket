@@ -41,7 +41,7 @@ pub fn main() {
   // Create a HTTP request to download an object
   let request =
     get_object.request(bucket: "my-bucket", key: "my/key.txt")
-    |> get_object.build()
+    |> get_object.build(creds)
 
   // Send the HTTP request
   let assert Ok(response) = httpc.send_bits(request)
