@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.0 - 2025-07-31
+
+- Relaxed `gleam_http` requirement.
+
 ## v1.2.0 - 2024-12-07
 
 - Updated for `gleam_stdlib` v0.45.0.
