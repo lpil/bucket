@@ -19,6 +19,7 @@ pub const creds = bucket.Credentials(
   region: "us-east-1",
   access_key_id: "minioadmin",
   secret_access_key: "miniopass",
+  session_token: option.None,
 )
 
 pub const bad_creds = bucket.Credentials(
@@ -28,6 +29,7 @@ pub const bad_creds = bucket.Credentials(
   region: "us-east-1",
   access_key_id: "unknown",
   secret_access_key: "nope",
+  session_token: option.None,
 )
 
 pub fn create_bucket(name: String) -> Nil {

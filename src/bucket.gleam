@@ -28,6 +28,7 @@ pub type Credentials {
     region: String,
     access_key_id: String,
     secret_access_key: String,
+    session_token: Option(String),
   )
 }
 
@@ -43,6 +44,7 @@ pub fn credentials(
     region: "eu-west-1",
     port: option.None,
     scheme: http.Https,
+    session_token: option.None,
   )
 }
 
@@ -59,6 +61,14 @@ pub fn with_port(creds: Credentials, port: Int) -> Credentials {
 /// Set the scheme for the credentials. You should use HTTPS unless not possible.
 pub fn with_scheme(creds: Credentials, scheme: http.Scheme) -> Credentials {
   Credentials(..creds, scheme:)
+}
+
+/// Set the session token if credentials given via a task or instance role
+pub fn with_session_token(
+  creds: Credentials,
+  session_token: String,
+) -> Credentials {
+  Credentials(..creds, session_token: option.Some(session_token))
 }
 
 pub type Bucket {
