@@ -22,3 +22,4 @@ gleam_stdlib = { version = ">= 0.45.0 and < 2.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
 xmb = { version = ">= 1.0.0 and < 2.0.0" }
 xmlm = { version = ">= 1.0.0 and < 2.0.0" }
+gleam_erlang = { version = ">= 0.33.0 and < 1.0.0" }

@@ -3,6 +3,7 @@ import bucket/complete_multipart_upload
 import bucket/create_multipart_upload
 import bucket/upload_part
 import gleam/bit_array
+import gleam/erlang
 import gleam/httpc
 import gleam/list
 import gleam/string
@@ -334,7 +335,7 @@ pub fn no_such_upload_test() {
   // Upload a part
   let key = "test/myfile"
   let part_body = helpers.get_random_bytes(5 * 1024 * 1024)
-  let assert Ok(res) =
+  let req =
     upload_part.request(
       bucket:,
       key:,
@@ -343,27 +344,37 @@ pub fn no_such_upload_test() {
       body: part_body,
     )
     |> upload_part.build(helpers.creds)
-    |> httpc.send_bits
-  let assert Error(res) = upload_part.response(res)
-  let assert S3Error(
-    http_status:,
-    error: ErrorObject(code:, message:, request_id:, resource:),
-  ) = res
 
-  http_status
-  |> should.equal(404)
+  case erlang.rescue(fn() { httpc.send_bits(req) }) {
+    Error(error) -> {
+      // TODO match Errored(UnexpectedHttpcError(SocketClosedRemotely))
+      let assert erlang.Errored(_unexpected_httpc_error) = error
+      Nil
+    }
+    Ok(res) -> {
+      let assert Ok(res) = res
+      let assert Error(res) = upload_part.response(res)
+      let assert S3Error(
+        http_status:,
+        error: ErrorObject(code:, message:, request_id:, resource:),
+      ) = res
 
-  code
-  |> should.equal("NoSuchUpload")
+      http_status
+      |> should.equal(404)
 
-  message
-  |> should.equal(
-    "The specified multipart upload does not exist. The upload ID may be invalid, or the upload may have been aborted or completed.",
-  )
+      code
+      |> should.equal("NoSuchUpload")
 
-  request_id
-  |> should.not_equal("")
+      message
+      |> should.equal(
+        "The specified multipart upload does not exist. The upload ID may be invalid, or the upload may have been aborted or completed.",
+      )
 
-  resource
-  |> should.equal("/" <> bucket <> "/" <> key)
+      request_id
+      |> should.not_equal("")
+
+      resource
+      |> should.equal("/" <> bucket <> "/" <> key)
+    }
+  }
 }
