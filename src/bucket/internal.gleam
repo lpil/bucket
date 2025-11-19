@@ -58,6 +58,7 @@ pub fn request(
     creds.region,
     "s3",
   )
+  |> with_session_token(creds)
   |> aws4_request.sign_bits(request)
 }
 
@@ -84,5 +85,16 @@ pub fn s3_error(response: Response(BitArray)) -> Result(a, BucketError) {
   case parsed {
     Ok(e) -> Error(e)
     Error(_) -> Error(bucket.UnexpectedResponseError(response))
+  }
+}
+
+fn with_session_token(
+  signer: aws4_request.Signer,
+  creds: Credentials,
+) -> aws4_request.Signer {
+  case creds.session_token {
+    option.None -> signer
+    option.Some(session_token) ->
+      aws4_request.with_session_token(signer, session_token)
   }
 }
