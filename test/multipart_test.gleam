@@ -226,6 +226,9 @@ pub fn invalid_part_test() {
 
   // Complete the multipart upload, no need to upload parts for this test
   let upload_id = res.upload_id
+  echo "UPLOAD ID"
+  echo upload_id
+
   let parts = [
     complete_multipart_upload.Part(part_number: 1, etag: "incorrect"),
     complete_multipart_upload.Part(part_number: 2, etag: "also incorrect"),
@@ -278,6 +281,8 @@ pub fn invalid_part_order_test() {
 
   // Upload the parts
   let upload_id = res.upload_id
+  echo "UPLOAD ID"
+  echo upload_id
   let part_size = 5 * 1024 * 1024
   let part1 = helpers.get_random_bytes(part_size)
   let part2 = helpers.get_random_bytes(part_size)
