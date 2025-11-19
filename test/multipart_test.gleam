@@ -335,7 +335,7 @@ pub fn no_such_upload_test() {
   let expired_id =
     "OWM1ZmM2MDEtNGRkOS00ZTU0LTk3MTUtMjYxMGVlZGY3NDRhLmNiNTQ5OWI5LTg5NTktNDg2Ni04NjkzLTYyNGIxODcxYzAzNXgxNzYzNTY3MTk4ODc1NzAzMTQ4"
   let key = "test/myfile"
-  let part_body = helpers.get_random_bytes(5 * 1024 * 1024)
+  let part_body = helpers.get_random_bytes(0)
   let assert Ok(res) =
     upload_part.request(
       bucket:,
