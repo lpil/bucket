@@ -332,13 +332,15 @@ pub fn no_such_upload_test() {
   helpers.create_bucket(bucket)
 
   // Upload a part
+  let expired_id =
+    "OWM1ZmM2MDEtNGRkOS00ZTU0LTk3MTUtMjYxMGVlZGY3NDRhLmNiNTQ5OWI5LTg5NTktNDg2Ni04NjkzLTYyNGIxODcxYzAzNXgxNzYzNTY3MTk4ODc1NzAzMTQ4"
   let key = "test/myfile"
   let part_body = helpers.get_random_bytes(5 * 1024 * 1024)
   let assert Ok(res) =
     upload_part.request(
       bucket:,
       key:,
-      upload_id: "incorrect",
+      upload_id: expired_id,
       part_number: 1,
       body: part_body,
     )
