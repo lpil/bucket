@@ -63,12 +63,12 @@ pub fn with_scheme(creds: Credentials, scheme: http.Scheme) -> Credentials {
   Credentials(..creds, scheme:)
 }
 
-/// Set the session token if credentials given via a task or instance role
+/// Set the optional session token when given via a task or instance role
 pub fn with_session_token(
   creds: Credentials,
-  session_token: String,
+  session_token: option.Option(String),
 ) -> Credentials {
-  Credentials(..creds, session_token: option.Some(session_token))
+  Credentials(..creds, session_token: session_token)
 }
 
 pub type Bucket {
