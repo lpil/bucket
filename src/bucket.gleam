@@ -63,7 +63,8 @@ pub fn with_scheme(creds: Credentials, scheme: http.Scheme) -> Credentials {
   Credentials(..creds, scheme:)
 }
 
-/// Set the optional session token when given via a task or instance role
+/// Set the optional session token, which could have given via a task or
+/// instance role if these are used within your deployment environment.
 pub fn with_session_token(
   creds: Credentials,
   session_token: option.Option(String),

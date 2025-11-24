@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.0 - 2025-11-24
+
+- Added the `with_session_token` function.
+
 ## v1.3.0 - 2025-07-31
 
 - Relaxed `gleam_http` requirement.
