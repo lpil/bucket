@@ -2,7 +2,7 @@ import bucket.{type BucketError, type Credentials}
 import bucket/internal
 import gleam/bit_array
 import gleam/http
-import gleam/http/request.{type Request, Request}
+import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/option.{type Option}
 import gleam/string_tree

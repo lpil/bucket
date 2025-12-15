@@ -1,10 +1,10 @@
-import bucket.{type BucketError, type Credentials, type ErrorObject, ErrorObject}
+import bucket.{type BucketError, type Credentials, type ErrorObject}
 import bucket/internal
 import bucket/internal/xml
 import gleam/bit_array
 import gleam/crypto
 import gleam/http
-import gleam/http/request.{type Request, Request}
+import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/list
 import gleam/option.{type Option}
