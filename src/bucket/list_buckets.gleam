@@ -2,7 +2,7 @@ import bucket.{type Bucket, type BucketError, type Credentials, Bucket}
 import bucket/internal
 import bucket/internal/xml
 import gleam/http
-import gleam/http/request.{type Request, Request}
+import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/int
 import gleam/option.{type Option}
