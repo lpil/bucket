@@ -50,7 +50,7 @@ pub fn main() {
   let assert Ok(Found(object)) = get_object.response(response)
 
   // Print the string contents
-  let assert Ok(text) = bit_array.from_string(object)
+  let assert Ok(text) = bit_array.to_string(object)
   io.println(text)
 }
 ```
