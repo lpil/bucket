@@ -1,6 +1,6 @@
-import gleam/http.{type Scheme}
 import gleam/http/response.{type Response}
 import gleam/option.{type Option}
+import gleam/uri
 
 pub type BucketError {
   InvalidXmlSyntaxError(String)
@@ -22,9 +22,9 @@ pub type ErrorObject {
 /// The creds used to connect to an S3 API.
 pub type Credentials {
   Credentials(
-    scheme: Scheme,
+    scheme: Option(String),
     port: Option(Int),
-    host: String,
+    host: Option(String),
     region: String,
     access_key_id: String,
     secret_access_key: String,
@@ -33,17 +33,19 @@ pub type Credentials {
 }
 
 pub fn credentials(
-  host: String,
+  base_url: String,
   access_key_id: String,
   secret_access_key: String,
 ) -> Credentials {
+  let assert Ok(parsed_url) = uri.parse(base_url)
+
   Credentials(
-    host:,
+    host: parsed_url.host,
+    port: parsed_url.port,
+    scheme: parsed_url.scheme,
+    region: "eu-west-1",
     access_key_id:,
     secret_access_key:,
-    region: "eu-west-1",
-    port: option.None,
-    scheme: http.Https,
     session_token: option.None,
   )
 }
@@ -51,16 +53,6 @@ pub fn credentials(
 /// Set the region for the credentials.
 pub fn with_region(creds: Credentials, region: String) -> Credentials {
   Credentials(..creds, region:)
-}
-
-/// Set the port for the credentials.
-pub fn with_port(creds: Credentials, port: Int) -> Credentials {
-  Credentials(..creds, port: option.Some(port))
-}
-
-/// Set the scheme for the credentials. You should use HTTPS unless not possible.
-pub fn with_scheme(creds: Credentials, scheme: http.Scheme) -> Credentials {
-  Credentials(..creds, scheme:)
 }
 
 /// Set the optional session token, which could have given via a task or

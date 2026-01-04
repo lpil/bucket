@@ -7,15 +7,14 @@ import bucket/head_object
 import bucket/list_buckets
 import bucket/list_objects
 import bucket/put_object
-import gleam/http
 import gleam/httpc
 import gleam/list
 import gleam/option
 
 pub const creds = bucket.Credentials(
-  scheme: http.Http,
+  scheme: option.Some("http"),
   port: option.Some(9000),
-  host: "localhost",
+  host: option.Some("localhost"),
   region: "us-east-1",
   access_key_id: "minioadmin",
   secret_access_key: "miniopass",
@@ -23,9 +22,9 @@ pub const creds = bucket.Credentials(
 )
 
 pub const bad_creds = bucket.Credentials(
-  scheme: http.Http,
+  scheme: option.Some("http"),
   port: option.Some(9000),
-  host: "localhost",
+  host: option.Some("localhost"),
   region: "us-east-1",
   access_key_id: "unknown",
   secret_access_key: "nope",

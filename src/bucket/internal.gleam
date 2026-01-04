@@ -9,6 +9,7 @@ import gleam/http/request.{type Request, Request}
 import gleam/http/response.{type Response}
 import gleam/list
 import gleam/option.{type Option}
+import gleam/result
 import gleam/uri
 import xmlm
 
@@ -43,14 +44,17 @@ pub fn request(
   }
   let request =
     Request(
-      method,
-      headers,
-      body,
-      creds.scheme,
-      creds.host,
-      creds.port,
-      path,
-      query,
+      method:,
+      headers:,
+      body:,
+      scheme: result.unwrap(
+        http.scheme_from_string(option.unwrap(creds.scheme, "https")),
+        http.Https,
+      ),
+      host: option.unwrap(creds.host, ""),
+      port: creds.port,
+      path:,
+      query:,
     )
   aws4_request.signer(
     creds.access_key_id,

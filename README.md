@@ -33,7 +33,7 @@ import httpc
 ///
 pub fn main() {
   let creds = bucket.credentials(
-    host: "s3-api-host.example.com",
+    base_url: "https://s3-api-host.example.com",
     access_key_id: "YOUR_ACCESS_KEY",
     secret_access_key: "YOUR_SECRET_ACCESS_KEY",
   )
