@@ -120,10 +120,7 @@ pub fn create_bucket_invalid_test() {
   let assert Ok(res) = httpc.send_bits(req)
   let assert Error(S3Error(
     http_status: 400,
-    error: ErrorObject(
-      code: "InvalidBucketName",
-      ..,
-    ),
+    error: ErrorObject(code: "InvalidBucketName", ..),
   )) = create_bucket.response(res)
 
   helpers.get_existing_bucket_names()
@@ -146,10 +143,7 @@ pub fn create_bucket_already_created_test() {
   let assert Ok(res) = httpc.send_bits(req)
   let assert Error(S3Error(
     http_status: 409,
-    error: ErrorObject(
-      code: "BucketAlreadyOwnedByYou",
-      ..,
-    ),
+    error: ErrorObject(code: "BucketAlreadyOwnedByYou", ..),
   )) = create_bucket.response(res)
 
   helpers.get_existing_bucket_names()
@@ -191,10 +185,7 @@ pub fn delete_not_found_test() {
     |> httpc.send_bits
   let assert Error(S3Error(
     http_status: 404,
-    error: ErrorObject(
-      code: "NoSuchBucket",
-      ..,
-    ),
+    error: ErrorObject(code: "NoSuchBucket", ..),
   )) = delete_bucket.response(res)
 }
 
