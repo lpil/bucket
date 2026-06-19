@@ -12,6 +12,7 @@ import bucket/put_object
 import gleam/httpc
 import gleam/list
 import gleam/option
+import gleam/string
 import gleam/uri
 import gleeunit
 import gleeunit/should
@@ -219,10 +220,16 @@ pub fn list_objects_test() {
   helpers.create_object("bucket", "o/2", <<"two":utf8>>)
   helpers.create_object("bucket", "o/3", <<"three":utf8>>)
 
-  let assert Ok(res) =
+  let req =
     list_objects.request("bucket")
     |> list_objects.build(helpers.creds)
-    |> httpc.send_bits
+
+  let assert option.Some(query) = req.query
+
+  string.contains(does: query, contain: "list-type=2")
+  |> should.be_true()
+
+  let assert Ok(res) = httpc.send_bits(req)
   let assert Ok(list_objects.ListObjectsResult(
     is_truncated: False,
     contents: [object3, object2, object1],

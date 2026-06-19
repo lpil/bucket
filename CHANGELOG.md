@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.0 - 2026-06-19
+
+- Fixed `list_objects` to use the S3 ListObjectsV2 API.
+
 ## v1.4.0 - 2025-11-24
 
 - Added the `with_session_token` function.
