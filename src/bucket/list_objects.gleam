@@ -50,6 +50,7 @@ pub fn start_after(builder: RequestBuilder, key: String) -> RequestBuilder {
 
 pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
   let query = [
+    #("list-type", option.Some("2")),
     #("start-after", builder.start_after),
     #("max-keys", builder.max_keys |> option.map(int.to_string)),
     #("prefix", builder.prefix),
