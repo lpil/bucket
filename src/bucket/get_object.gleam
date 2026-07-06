@@ -32,7 +32,9 @@ pub fn build(builder: RequestBuilder, creds: Credentials) -> Request(BitArray) {
   )
 }
 
-pub fn response(response: Response(body)) -> Result(Outcome(body), BucketError) {
+pub fn response(
+  response: Response(body),
+) -> Result(Outcome(body), BucketError) {
   case response.status {
     200 -> Ok(Found(response.body))
     404 -> Ok(NotFound)

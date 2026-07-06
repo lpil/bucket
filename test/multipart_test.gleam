@@ -6,7 +6,6 @@ import gleam/bit_array
 import gleam/httpc
 import gleam/list
 import gleam/string
-import gleeunit/should
 import helpers
 
 /// Perform a basic multipart upload and verify it works as expected
@@ -23,9 +22,9 @@ pub fn perform_multipart_upload_test() {
     |> create_multipart_upload.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = create_multipart_upload.response(res)
-  should.equal(res.bucket, bucket)
-  should.equal(res.key, key)
-  should.not_equal(res.upload_id, "")
+  assert res.bucket == bucket
+  assert res.key == key
+  assert res.upload_id != ""
 
   // Upload some parts (they can be sent in parallel)
   // NOTE: The minimum Part size for multipart upload is 5MiB, except the last part.
@@ -43,7 +42,7 @@ pub fn perform_multipart_upload_test() {
         |> upload_part.build(helpers.creds)
         |> httpc.send_bits
       let assert Ok(res) = upload_part.response(res)
-      should.not_equal(res.etag, "")
+      assert res.etag != ""
       complete_multipart_upload.Part(part_number:, etag: res.etag)
     })
 
@@ -53,26 +52,19 @@ pub fn perform_multipart_upload_test() {
     |> complete_multipart_upload.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = complete_multipart_upload.response(res)
-  should.be_true(string.contains(res.location, "/" <> bucket <> "/" <> key))
-  should.equal(res.bucket, bucket)
-  should.equal(res.key, key)
-  should.not_equal(res.etag, "")
+  assert string.contains(res.location, "/" <> bucket <> "/" <> key)
+  assert res.bucket == bucket
+  assert res.key == key
+  assert res.etag != ""
 
   // Get the uploaded object and verify its contents
   let contents = helpers.get_object(bucket, key)
-  should.equal(bit_array.byte_size(contents), 2 * part_size + 8)
-  should.equal(
-    bit_array.slice(from: contents, at: 0, take: part_size),
-    Ok(part1),
-  )
-  should.equal(
-    bit_array.slice(from: contents, at: part_size, take: part_size),
-    Ok(part2),
-  )
-  should.equal(
-    bit_array.slice(from: contents, at: 2 * part_size, take: 8),
-    Ok(part3),
-  )
+  assert bit_array.byte_size(contents) == 2 * part_size + 8
+  assert bit_array.slice(from: contents, at: 0, take: part_size) == Ok(part1)
+  assert bit_array.slice(from: contents, at: part_size, take: part_size)
+    == Ok(part2)
+  assert bit_array.slice(from: contents, at: 2 * part_size, take: 8)
+    == Ok(part3)
 }
 
 /// S3 allows us to discard parts when completing a multipart upload
@@ -89,9 +81,9 @@ pub fn complete_upload_skip_parts_test() {
     |> create_multipart_upload.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = create_multipart_upload.response(res)
-  should.equal(res.bucket, bucket)
-  should.equal(res.key, key)
-  should.not_equal(res.upload_id, "")
+  assert res.bucket == bucket
+  assert res.key == key
+  assert res.upload_id != ""
 
   // Upload some parts
   let upload_id = res.upload_id
@@ -109,7 +101,7 @@ pub fn complete_upload_skip_parts_test() {
         |> upload_part.build(helpers.creds)
         |> httpc.send_bits
       let assert Ok(res) = upload_part.response(res)
-      should.not_equal(res.etag, "")
+      assert res.etag != ""
       complete_multipart_upload.Part(part_number:, etag: res.etag)
     })
 
@@ -121,22 +113,17 @@ pub fn complete_upload_skip_parts_test() {
     |> complete_multipart_upload.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = complete_multipart_upload.response(res)
-  should.be_true(string.contains(res.location, "/" <> bucket <> "/" <> key))
-  should.equal(res.bucket, bucket)
-  should.equal(res.key, key)
-  should.not_equal(res.etag, "")
+  assert string.contains(res.location, "/" <> bucket <> "/" <> key)
+  assert res.bucket == bucket
+  assert res.key == key
+  assert res.etag != ""
 
   // Get the uploaded object and verify its contents
   let contents = helpers.get_object(bucket, key)
-  should.equal(bit_array.byte_size(contents), 2 * part_size)
-  should.equal(
-    bit_array.slice(from: contents, at: 0, take: part_size),
-    Ok(part2),
-  )
-  should.equal(
-    bit_array.slice(from: contents, at: part_size, take: part_size),
-    Ok(part3),
-  )
+  assert bit_array.byte_size(contents) == 2 * part_size
+  assert bit_array.slice(from: contents, at: 0, take: part_size) == Ok(part2)
+  assert bit_array.slice(from: contents, at: part_size, take: part_size)
+    == Ok(part3)
 }
 
 /// Attempt to complete a multipart upload with parts smaller than the minimum size
@@ -153,9 +140,9 @@ pub fn entity_too_small_test() {
     |> create_multipart_upload.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = create_multipart_upload.response(res)
-  should.equal(res.bucket, bucket)
-  should.equal(res.key, key)
-  should.not_equal(res.upload_id, "")
+  assert res.bucket == bucket
+  assert res.key == key
+  assert res.upload_id != ""
 
   // Upload the parts
   let upload_id = res.upload_id
@@ -172,7 +159,7 @@ pub fn entity_too_small_test() {
         |> upload_part.build(helpers.creds)
         |> httpc.send_bits
       let assert Ok(res) = upload_part.response(res)
-      should.not_equal(res.etag, "")
+      assert res.etag != ""
       complete_multipart_upload.Part(part_number:, etag: res.etag)
     })
 
@@ -187,22 +174,16 @@ pub fn entity_too_small_test() {
     error: ErrorObject(code:, message:, request_id:, resource:),
   ) = res
 
-  http_status
-  |> should.equal(400)
+  assert http_status == 400
 
-  code
-  |> should.equal("EntityTooSmall")
+  assert code == "EntityTooSmall"
 
-  message
-  |> should.equal(
-    "Your proposed upload is smaller than the minimum allowed object size.",
-  )
+  assert message
+    == "Your proposed upload is smaller than the minimum allowed object size."
 
-  request_id
-  |> should.not_equal("")
+  assert request_id != ""
 
-  resource
-  |> should.equal("/" <> bucket <> "/" <> key)
+  assert resource == "/" <> bucket <> "/" <> key
 }
 
 /// Attempt to complete a multipart upload with an incorrect ETag in one of the parts
@@ -219,9 +200,9 @@ pub fn invalid_part_test() {
     |> create_multipart_upload.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = create_multipart_upload.response(res)
-  should.equal(res.bucket, bucket)
-  should.equal(res.key, key)
-  should.not_equal(res.upload_id, "")
+  assert res.bucket == bucket
+  assert res.key == key
+  assert res.upload_id != ""
 
   // Complete the multipart upload, no need to upload parts for this test
   let upload_id = res.upload_id
@@ -239,22 +220,16 @@ pub fn invalid_part_test() {
     error: ErrorObject(code:, message:, request_id:, resource:),
   ) = res
 
-  http_status
-  |> should.equal(400)
+  assert http_status == 400
 
-  code
-  |> should.equal("InvalidPart")
+  assert code == "InvalidPart"
 
-  message
-  |> should.equal(
-    "One or more of the specified parts could not be found.  The part may not have been uploaded, or the specified entity tag may not match the part's entity tag.",
-  )
+  assert message
+    == "One or more of the specified parts could not be found.  The part may not have been uploaded, or the specified entity tag may not match the part's entity tag."
 
-  request_id
-  |> should.not_equal("")
+  assert request_id != ""
 
-  resource
-  |> should.equal("/" <> bucket <> "/" <> key)
+  assert resource == "/" <> bucket <> "/" <> key
 }
 
 /// Attempt to complete a multipart upload with parts in an invalid order
@@ -271,9 +246,9 @@ pub fn invalid_part_order_test() {
     |> create_multipart_upload.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = create_multipart_upload.response(res)
-  should.equal(res.bucket, bucket)
-  should.equal(res.key, key)
-  should.not_equal(res.upload_id, "")
+  assert res.bucket == bucket
+  assert res.key == key
+  assert res.upload_id != ""
 
   // Upload the parts
   let upload_id = res.upload_id
@@ -290,7 +265,7 @@ pub fn invalid_part_order_test() {
         |> upload_part.build(helpers.creds)
         |> httpc.send_bits
       let assert Ok(res) = upload_part.response(res)
-      should.not_equal(res.etag, "")
+      assert res.etag != ""
       complete_multipart_upload.Part(part_number:, etag: res.etag)
     })
 
@@ -306,22 +281,16 @@ pub fn invalid_part_order_test() {
     error: ErrorObject(code:, message:, request_id:, resource:),
   ) = res
 
-  http_status
-  |> should.equal(400)
+  assert http_status == 400
 
-  code
-  |> should.equal("InvalidPartOrder")
+  assert code == "InvalidPartOrder"
 
-  message
-  |> should.equal(
-    "The list of parts was not in ascending order. The parts list must be specified in order by part number.",
-  )
+  assert message
+    == "The list of parts was not in ascending order. The parts list must be specified in order by part number."
 
-  request_id
-  |> should.not_equal("")
+  assert request_id != ""
 
-  resource
-  |> should.equal("/" <> bucket <> "/" <> key)
+  assert resource == "/" <> bucket <> "/" <> key
 }
 
 /// Attempt to upload a part with incorrect upload_id
@@ -352,20 +321,14 @@ pub fn no_such_upload_test() {
     error: ErrorObject(code:, message:, request_id:, resource:),
   ) = res
 
-  http_status
-  |> should.equal(404)
+  assert http_status == 404
 
-  code
-  |> should.equal("NoSuchUpload")
+  assert code == "NoSuchUpload"
 
-  message
-  |> should.equal(
-    "The specified multipart upload does not exist. The upload ID may be invalid, or the upload may have been aborted or completed.",
-  )
+  assert message
+    == "The specified multipart upload does not exist. The upload ID may be invalid, or the upload may have been aborted or completed."
 
-  request_id
-  |> should.not_equal("")
+  assert request_id != ""
 
-  resource
-  |> should.equal("/" <> bucket <> "/" <> key)
+  assert resource == "/" <> bucket <> "/" <> key
 }

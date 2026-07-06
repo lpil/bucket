@@ -1,8 +1,9 @@
 # Changelog
 
-## v1.5.0 - 2026-06-19
+## v1.5.0 - 2026-07-06
 
-- Fixed `list_objects` to use the S3 ListObjectsV2 API.
+- `list_objects` now requests the `ListObjectsV2` API, fixing pagination for
+  servers that provide the v1 API unless v2 is explicitly requested.
 
 ## v1.4.0 - 2025-11-24
 

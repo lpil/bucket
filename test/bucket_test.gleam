@@ -12,10 +12,8 @@ import bucket/put_object
 import gleam/httpc
 import gleam/list
 import gleam/option
-import gleam/string
 import gleam/uri
 import gleeunit
-import gleeunit/should
 import helpers
 
 pub fn main() {
@@ -33,22 +31,16 @@ pub fn list_buckets_bad_creds_test() {
     error: ErrorObject(code:, message:, request_id:, resource:),
   ) = res
 
-  http_status
-  |> should.equal(403)
+  assert http_status == 403
 
-  code
-  |> should.equal("InvalidAccessKeyId")
+  assert code == "InvalidAccessKeyId"
 
-  message
-  |> should.equal(
-    "The Access Key Id you provided does not exist in our records.",
-  )
+  assert message
+    == "The Access Key Id you provided does not exist in our records."
 
-  request_id
-  |> should.not_equal("")
+  assert request_id != ""
 
-  resource
-  |> should.equal("/")
+  assert resource == "/"
 }
 
 pub fn list_buckets_test() {
@@ -59,11 +51,8 @@ pub fn list_buckets_test() {
     |> list_buckets.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = list_buckets.response(res)
-  res
-  |> should.equal(ListAllMyBucketsResult(
-    buckets: [],
-    continuation_token: option.None,
-  ))
+  assert res
+    == ListAllMyBucketsResult(buckets: [], continuation_token: option.None)
 
   helpers.create_bucket("bucket1")
   helpers.create_bucket("bucket2")
@@ -74,11 +63,9 @@ pub fn list_buckets_test() {
     |> list_buckets.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(res) = list_buckets.response(res)
-  res.continuation_token
-  |> should.equal(option.None)
-  res.buckets
-  |> list.map(fn(b) { b.name })
-  |> should.equal(["bucket3", "bucket2", "bucket1"])
+  assert res.continuation_token == option.None
+  assert list.map(res.buckets, fn(b) { b.name })
+    == ["bucket3", "bucket2", "bucket1"]
 }
 
 pub fn create_bucket_test() {
@@ -87,12 +74,12 @@ pub fn create_bucket_test() {
   let req =
     create_bucket.request(name: "bucket1")
     |> create_bucket.build(helpers.creds)
-  req.body
-  |> should.equal(<<
-    "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
-    "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
-    "</CreateBucketConfiguration>":utf8,
-  >>)
+  assert req.body
+    == <<
+      "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
+      "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
+      "</CreateBucketConfiguration>":utf8,
+    >>
   let assert Ok(res) = httpc.send_bits(req)
   let assert Ok(Nil) = create_bucket.response(res)
 
@@ -102,8 +89,7 @@ pub fn create_bucket_test() {
     |> httpc.send_bits
   let assert Ok(Nil) = create_bucket.response(res)
 
-  helpers.get_existing_bucket_names()
-  |> should.equal(["bucket2", "bucket1"])
+  assert helpers.get_existing_bucket_names() == ["bucket2", "bucket1"]
 }
 
 pub fn create_bucket_invalid_test() {
@@ -112,23 +98,19 @@ pub fn create_bucket_invalid_test() {
   let req =
     create_bucket.request(name: uri.percent_encode("%%%"))
     |> create_bucket.build(helpers.creds)
-  req.body
-  |> should.equal(<<
-    "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
-    "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
-    "</CreateBucketConfiguration>":utf8,
-  >>)
+  assert req.body
+    == <<
+      "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
+      "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
+      "</CreateBucketConfiguration>":utf8,
+    >>
   let assert Ok(res) = httpc.send_bits(req)
   let assert Error(S3Error(
     http_status: 400,
-    error: ErrorObject(
-      code: "InvalidBucketName",
-      ..,
-    ),
+    error: ErrorObject(code: "InvalidBucketName", ..),
   )) = create_bucket.response(res)
 
-  helpers.get_existing_bucket_names()
-  |> should.equal([])
+  assert helpers.get_existing_bucket_names() == []
 }
 
 pub fn create_bucket_already_created_test() {
@@ -138,23 +120,19 @@ pub fn create_bucket_already_created_test() {
   let req =
     create_bucket.request(name: "bucket1")
     |> create_bucket.build(helpers.creds)
-  req.body
-  |> should.equal(<<
-    "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
-    "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
-    "</CreateBucketConfiguration>":utf8,
-  >>)
+  assert req.body
+    == <<
+      "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">":utf8,
+      "<LocationConstraint>us-east-1</LocationConstraint>":utf8,
+      "</CreateBucketConfiguration>":utf8,
+    >>
   let assert Ok(res) = httpc.send_bits(req)
   let assert Error(S3Error(
     http_status: 409,
-    error: ErrorObject(
-      code: "BucketAlreadyOwnedByYou",
-      ..,
-    ),
+    error: ErrorObject(code: "BucketAlreadyOwnedByYou", ..),
   )) = create_bucket.response(res)
 
-  helpers.get_existing_bucket_names()
-  |> should.equal(["bucket1"])
+  assert helpers.get_existing_bucket_names() == ["bucket1"]
 }
 
 pub fn delete_test() {
@@ -170,8 +148,7 @@ pub fn delete_test() {
     |> httpc.send_bits
   let assert Ok(Nil) = delete_bucket.response(res)
 
-  helpers.get_existing_bucket_names()
-  |> should.equal(["bucket3", "bucket1"])
+  assert helpers.get_existing_bucket_names() == ["bucket3", "bucket1"]
 
   let assert Ok(res) =
     delete_bucket.request(name: "bucket3")
@@ -179,8 +156,7 @@ pub fn delete_test() {
     |> httpc.send_bits
   let assert Ok(Nil) = delete_bucket.response(res)
 
-  helpers.get_existing_bucket_names()
-  |> should.equal(["bucket1"])
+  assert helpers.get_existing_bucket_names() == ["bucket1"]
 }
 
 pub fn delete_not_found_test() {
@@ -192,10 +168,7 @@ pub fn delete_not_found_test() {
     |> httpc.send_bits
   let assert Error(S3Error(
     http_status: 404,
-    error: ErrorObject(
-      code: "NoSuchBucket",
-      ..,
-    ),
+    error: ErrorObject(code: "NoSuchBucket", ..),
   )) = delete_bucket.response(res)
 }
 
@@ -210,7 +183,7 @@ pub fn put_object_test() {
     |> put_object.build(helpers.creds)
     |> httpc.send_bits
   let assert Ok(put_object.PutObjectResult(etag:)) = put_object.response(res)
-  etag |> should.not_equal("")
+  assert etag != ""
 }
 
 pub fn list_objects_test() {
@@ -224,11 +197,7 @@ pub fn list_objects_test() {
     list_objects.request("bucket")
     |> list_objects.build(helpers.creds)
 
-  let assert option.Some(query) = req.query
-
-  string.contains(does: query, contain: "list-type=2")
-  |> should.be_true()
-
+  assert req.query == option.Some("list-type=2")
   let assert Ok(res) = httpc.send_bits(req)
   let assert Ok(list_objects.ListObjectsResult(
     is_truncated: False,
@@ -237,8 +206,8 @@ pub fn list_objects_test() {
 
   let assert list_objects.Object(key: "o/1", last_modified:, etag:, size: 3) =
     object1
-  etag |> should.not_equal("")
-  last_modified |> should.not_equal("")
+  assert etag != ""
+  assert last_modified != ""
   let assert list_objects.Object(key: "o/2", size: 3, ..) = object2
   let assert list_objects.Object(key: "o/3", size: 5, ..) = object3
 }
@@ -384,8 +353,7 @@ pub fn delete_object_test() {
   helpers.create_bucket("bucket")
   helpers.create_object("bucket", "key", <<"ok":utf8>>)
 
-  helpers.does_object_exist("bucket", "key")
-  |> should.be_true
+  assert helpers.does_object_exist("bucket", "key")
 
   let assert Ok(res) =
     delete_object.request(bucket: "bucket", key: "key")
@@ -393,8 +361,7 @@ pub fn delete_object_test() {
     |> httpc.send_bits
   let assert Ok(Nil) = delete_object.response(res)
 
-  helpers.does_object_exist("bucket", "key")
-  |> should.be_false
+  assert !helpers.does_object_exist("bucket", "key")
 }
 
 pub fn delete_object_not_found_test() {

@@ -208,7 +208,9 @@ fn skip(input: xmlm.Input, depth: Int) -> Result(xmlm.Input, BucketError) {
   }
 }
 
-fn text_element(input: xmlm.Input) -> Result(#(String, xmlm.Input), BucketError) {
+fn text_element(
+  input: xmlm.Input,
+) -> Result(#(String, xmlm.Input), BucketError) {
   parse_text_element("", input)
 }
 
